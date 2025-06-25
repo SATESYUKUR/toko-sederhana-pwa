@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toko Sederhana - Menu</title>
-  <link rel="manifest" href="manifest.json">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
   <style>
     body {
       font-family: sans-serif;
@@ -74,17 +73,22 @@
       margin-left: 5px;
       background: #f44336;
     }
+    #status {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: green;
+    }
   </style>
 </head>
 <body>
   <h1>Menu Toko</h1>
 
   <label for="nama">Nama Pelanggan:</label>
-  <input type="text" id="nama" placeholder="Masukkan nama Anda">
+  <input type="text" id="nama" placeholder="Masukkan nama Anda" />
 
   <div class="menu">
     <div class="item">
-      <img src="minas-ayam.png" alt="Minas Ayam">
+      <img src="minas-ayam.png" alt="Minas Ayam" />
       <div class="item-info">
         <h3>Minas Ayam</h3>
         <p>Rp 15.000</p>
@@ -92,7 +96,7 @@
       </div>
     </div>
     <div class="item">
-      <img src="minas-sate.png" alt="Minas Sate">
+      <img src="minas-sate.png" alt="Minas Sate" />
       <div class="item-info">
         <h3>Minas Sate</h3>
         <p>Rp 17.000</p>
@@ -100,7 +104,7 @@
       </div>
     </div>
     <div class="item">
-      <img src="minas-telor.png" alt="Minas Telor">
+      <img src="minas-telor.png" alt="Minas Telor" />
       <div class="item-info">
         <h3>Minas Telor</h3>
         <p>Rp 14.000</p>
@@ -108,7 +112,7 @@
       </div>
     </div>
     <div class="item">
-      <img src="minuman.png" alt="Minuman">
+      <img src="minuman.png" alt="Minuman" />
       <div class="item-info">
         <h3>Minuman</h3>
         <p>Rp 5.000</p>
@@ -122,17 +126,10 @@
     <ul id="daftarKeranjang"></ul>
     <p>Total: Rp <span id="totalHarga">0</span></p>
     <button onclick="checkout()">Checkout</button>
+    <div id="status"></div>
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBoERtSGZqnTw5eWD3TOTl9Nog4M4-r4mw",
-      authDomain: "uda-syukur.firebaseapp.com",
-      projectId: "uda-syukur"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
     const keranjang = [];
 
     function tambahKeKeranjang(nama, harga) {
@@ -146,19 +143,19 @@
     }
 
     function renderKeranjang() {
-      const ul = document.getElementById('daftarKeranjang');
-      ul.innerHTML = '';
+      const ul = document.getElementById("daftarKeranjang");
+      ul.innerHTML = "";
       let total = 0;
       keranjang.forEach((item, index) => {
         total += item.harga * item.jumlah;
-        const li = document.createElement('li');
-        li.innerHTML = `${item.nama} x ${item.jumlah} = Rp ${item.harga * item.jumlah} 
+        const li = document.createElement("li");
+        li.innerHTML = `${item.nama} x ${item.jumlah} = Rp ${item.harga * item.jumlah}
           <button onclick="ubahJumlah(${index}, -1)">-</button>
           <button onclick="ubahJumlah(${index}, 1)">+</button>
           <button onclick="hapusItem(${index})">Batal</button>`;
         ul.appendChild(li);
       });
-      document.getElementById('totalHarga').textContent = total;
+      document.getElementById("totalHarga").textContent = total;
     }
 
     function ubahJumlah(index, delta) {
@@ -174,29 +171,19 @@
 
     function checkout() {
       const nama = document.getElementById("nama").value.trim();
+      const statusEl = document.getElementById("status");
       if (!nama) {
-        alert("Silakan isi nama pelanggan.");
+        statusEl.textContent = "⚠️ Silakan isi nama pelanggan.";
         return;
       }
       if (keranjang.length === 0) {
-        alert("Keranjang masih kosong.");
+        statusEl.textContent = "⚠️ Keranjang masih kosong.";
         return;
       }
-      const waktu = new Date();
-      const total = keranjang.reduce((acc, item) => acc + item.harga * item.jumlah, 0);
-      db.collection("pesanan").add({
-        nama,
-        items: keranjang,
-        total,
-        waktu: waktu.toISOString()
-      }).then(() => {
-        alert(`Pesanan atas nama ${nama} telah dikirim!`);
-        keranjang.length = 0;
-        renderKeranjang();
-        document.getElementById("nama").value = "";
-      }).catch(error => {
-        alert("Gagal menyimpan pesanan: " + error.message);
-      });
+      statusEl.textContent = `✅ Pesanan atas nama ${nama} telah dikirim!`;
+      keranjang.length = 0;
+      renderKeranjang();
+      document.getElementById("nama").value = "";
     }
   </script>
 </body>
