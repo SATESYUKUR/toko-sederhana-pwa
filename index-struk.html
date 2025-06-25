@@ -208,6 +208,7 @@ function cetakStruk() {
 
   let total = 0;
   keranjang.forEach(item => {
+    if (!item || typeof item.price !== "number" || !item.name) return;
     isiStruk += `<li>${item.name} - Rp ${item.price.toLocaleString("id-ID")}</li>`;
     total += item.price;
   });
