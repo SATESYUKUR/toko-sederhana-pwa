@@ -187,6 +187,7 @@
       document.getElementById("nama").value = "";
     }
   
+
 function cetakStruk() {
   const nama = document.getElementById("nama").value.trim();
   if (!nama || keranjang.length === 0) {
@@ -203,21 +204,38 @@ function cetakStruk() {
       <p>Nama Pelanggan: <strong>${nama}</strong></p>
       <p>Tanggal: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}</p>
       <hr>
-      <ul>
+      <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse:collapse;">
+        <tr><th>Nama Barang</th><th>Jumlah</th><th>Harga</th><th>Subtotal</th></tr>
   `;
 
   let total = 0;
+  const rekap = {};
+
   keranjang.forEach(item => {
     if (!item || typeof item.price !== "number" || !item.name) return;
-    isiStruk += `<li>${item.name} - Rp ${item.price.toLocaleString("id-ID")}</li>`;
-    total += item.price;
+    if (!rekap[item.name]) {
+      rekap[item.name] = { jumlah: 0, harga: item.price };
+    }
+    rekap[item.name].jumlah += 1;
+  });
+
+  Object.keys(rekap).forEach(nama => {
+    const item = rekap[nama];
+    const subtotal = item.jumlah * item.harga;
+    total += subtotal;
+    isiStruk += `<tr>
+      <td>${nama}</td>
+      <td>${item.jumlah}</td>
+      <td>Rp ${item.harga.toLocaleString("id-ID")}</td>
+      <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
+    </tr>`;
   });
 
   isiStruk += `
-      </ul>
+      </table>
       <hr>
-      <p><strong>Total: Rp ${total.toLocaleString("id-ID")}</strong></p>
-      <p>Terima kasih atas pembeliannya!</p>
+      <p style="text-align:right"><strong>Total: Rp ${total.toLocaleString("id-ID")}</strong></p>
+      <p style="text-align:center">Terima kasih atas pembeliannya!</p>
       <script>window.print();<\/script>
     </body>
     </html>
