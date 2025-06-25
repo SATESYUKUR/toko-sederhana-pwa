@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toko Sederhana - Menu</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background: #f5f5f5;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+    .item {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .item img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+    .item-info {
+      padding: 0.5rem;
+    }
+    .item-info h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+    .item-info p {
+      margin: 0.25rem 0;
+      font-size: 0.9rem;
+      color: #444;
+    }
+    .keranjang {
+      margin-top: 2rem;
+    }
+    label {
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 0.25rem;
+    }
+    .keranjang li button {
+      margin-left: 5px;
+      background: #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>Menu Toko</h1>
+
+  <label for="nama">Nama Pelanggan:</label>
+  <input type="text" id="nama" placeholder="Masukkan nama Anda">
+
+  <div class="menu">
+    <div class="item">
+      <img src="minas-ayam.png" alt="Minas Ayam">
+      <div class="item-info">
+        <h3>Minas Ayam</h3>
+        <p>Rp 15.000</p>
+        <button onclick="tambahKeKeranjang('Minas Ayam', 15000)">Tambah</button>
+      </div>
+    </div>
+    <div class="item">
+      <img src="minas-sate.png" alt="Minas Sate">
+      <div class="item-info">
+        <h3>Minas Sate</h3>
+        <p>Rp 17.000</p>
+        <button onclick="tambahKeKeranjang('Minas Sate', 17000)">Tambah</button>
+      </div>
+    </div>
+    <div class="item">
+      <img src="minas-telor.png" alt="Minas Telor">
+      <div class="item-info">
+        <h3>Minas Telor</h3>
+        <p>Rp 14.000</p>
+        <button onclick="tambahKeKeranjang('Minas Telor', 14000)">Tambah</button>
+      </div>
+    </div>
+    <div class="item">
+      <img src="minuman.png" alt="Minuman">
+      <div class="item-info">
+        <h3>Minuman</h3>
+        <p>Rp 5.000</p>
+        <button onclick="tambahKeKeranjang('Minuman', 5000)">Tambah</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="keranjang">
+    <h2>Keranjang</h2>
+    <ul id="daftarKeranjang"></ul>
+    <p>Total: Rp <span id="totalHarga">0</span></p>
+    <button onclick="checkout()">Checkout</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoERtSGZqnTw5eWD3TOTl9Nog4M4-r4mw",
+      authDomain: "uda-syukur.firebaseapp.com",
+      projectId: "uda-syukur"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const keranjang = [];
+
+    function tambahKeKeranjang(nama, harga) {
+      const existing = keranjang.find(item => item.nama === nama);
+      if (existing) {
+        existing.jumlah += 1;
+      } else {
+        keranjang.push({ nama, harga, jumlah: 1 });
+      }
+      renderKeranjang();
+    }
+
+    function renderKeranjang() {
+      const ul = document.getElementById('daftarKeranjang');
+      ul.innerHTML = '';
+      let total = 0;
+      keranjang.forEach((item, index) => {
+        total += item.harga * item.jumlah;
+        const li = document.createElement('li');
+        li.innerHTML = `${item.nama} x ${item.jumlah} = Rp ${item.harga * item.jumlah} 
+          <button onclick="ubahJumlah(${index}, -1)">-</button>
+          <button onclick="ubahJumlah(${index}, 1)">+</button>
+          <button onclick="hapusItem(${index})">Batal</button>`;
+        ul.appendChild(li);
+      });
+      document.getElementById('totalHarga').textContent = total;
+    }
+
+    function ubahJumlah(index, delta) {
+      keranjang[index].jumlah += delta;
+      if (keranjang[index].jumlah <= 0) keranjang.splice(index, 1);
+      renderKeranjang();
+    }
+
+    function hapusItem(index) {
+      keranjang.splice(index, 1);
+      renderKeranjang();
+    }
+
+    function checkout() {
+      const nama = document.getElementById("nama").value.trim();
+      if (!nama) {
+        alert("Silakan isi nama pelanggan.");
+        return;
+      }
+      if (keranjang.length === 0) {
+        alert("Keranjang masih kosong.");
+        return;
+      }
+      const waktu = new Date();
+      const total = keranjang.reduce((acc, item) => acc + item.harga * item.jumlah, 0);
+      db.collection("pesanan").add({
+        nama,
+        items: keranjang,
+        total,
+        waktu: waktu.toISOString()
+      }).then(() => {
+        alert(`Pesanan atas nama ${nama} telah dikirim!`);
+        keranjang.length = 0;
+        renderKeranjang();
+        document.getElementById("nama").value = "";
+      }).catch(error => {
+        alert("Gagal menyimpan pesanan: " + error.message);
+      });
+    }
+  </script>
+</body>
+</html>
