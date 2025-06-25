@@ -1,189 +1,83 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toko Sederhana - Menu</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icon-192.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menu Hari Ini</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
-      background: #f5f5f5;
-      max-width: 800px;
-      margin: auto;
-    }
-    h1 {
-      text-align: center;
-    }
-    .menu {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1rem;
-    }
-    .item {
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-    }
-    .item img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-    }
-    .item-info {
-      padding: 0.5rem;
-    }
-    .item-info h3 {
-      margin: 0;
-      font-size: 1rem;
-    }
-    .item-info p {
-      margin: 0.25rem 0;
-      font-size: 0.9rem;
-      color: #444;
-    }
-    .keranjang {
-      margin-top: 2rem;
-    }
-    label {
-      font-weight: bold;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 0.25rem;
-    }
-    .keranjang li button {
-      margin-left: 5px;
-      background: #f44336;
-    }
-    #status {
-      margin-top: 1rem;
-      font-weight: bold;
-      color: green;
-    }
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    .menu { display: flex; flex-wrap: wrap; gap: 10px; }
+    .item { border: 1px solid #ccc; padding: 10px; width: 180px; text-align: center; }
+    .keranjang { margin-top: 20px; border-top: 1px solid #000; padding-top: 10px; }
+    input[type=text] { width: 200px; padding: 5px; }
+    button { padding: 5px 10px; margin-top: 5px; }
   </style>
 </head>
 <body>
-  <h1>Menu Toko</h1>
+  <h1>Menu Hari Ini</h1>
 
-  <label for="nama">Nama Pelanggan:</label>
-  <input type="text" id="nama" placeholder="Masukkan nama Anda" />
-
-  <div class="menu">
-    <div class="item">
-      <img src="minas-ayam.png" alt="Minas Ayam" />
-      <div class="item-info">
-        <h3>Minas Ayam</h3>
-        <p>Rp 15.000</p>
-        <button onclick="tambahKeKeranjang('Minas Ayam', 15000)">Tambah</button>
-      </div>
-    </div>
-    <div class="item">
-      <img src="minas-sate.png" alt="Minas Sate" />
-      <div class="item-info">
-        <h3>Minas Sate</h3>
-        <p>Rp 17.000</p>
-        <button onclick="tambahKeKeranjang('Minas Sate', 17000)">Tambah</button>
-      </div>
-    </div>
-    <div class="item">
-      <img src="minas-telor.png" alt="Minas Telor" />
-      <div class="item-info">
-        <h3>Minas Telor</h3>
-        <p>Rp 14.000</p>
-        <button onclick="tambahKeKeranjang('Minas Telor', 14000)">Tambah</button>
-      </div>
-    </div>
-    <div class="item">
-      <img src="minuman.png" alt="Minuman" />
-      <div class="item-info">
-        <h3>Minuman</h3>
-        <p>Rp 5.000</p>
-        <button onclick="tambahKeKeranjang('Minuman', 5000)">Tambah</button>
-      </div>
-    </div>
-  </div>
+  <div class="menu" id="menu"></div>
 
   <div class="keranjang">
-    <h2>Keranjang</h2>
-    <ul id="daftarKeranjang"></ul>
-    <p>Total: Rp <span id="totalHarga">0</span></p>
+    <h2>Keranjang Belanja</h2>
+    <input type="text" id="nama" placeholder="Nama Pelanggan"/><br/>
+    <ul id="keranjang-list"></ul>
+    <p>Total: Rp <span id="total">0</span></p>
     <button onclick="checkout()">Checkout</button>
-    <div id="status"></div>
   </div>
 
   <script>
+    const produk = [
+      { nama: "Minas Ayam", harga: 18000 },
+      { nama: "Minas Sate", harga: 14000 },
+      { nama: "Minas Telor", harga: 14000 },
+      { nama: "Minuman", harga: 5000 }
+    ];
+
     const keranjang = [];
 
-    function tambahKeKeranjang(nama, harga) {
-      const existing = keranjang.find(item => item.nama === nama);
-      if (existing) {
-        existing.jumlah += 1;
-      } else {
-        keranjang.push({ nama, harga, jumlah: 1 });
-      }
+    const menuDiv = document.getElementById("menu");
+    const keranjangList = document.getElementById("keranjang-list");
+    const totalEl = document.getElementById("total");
+
+    produk.forEach((p, i) => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <strong>${p.nama}</strong><br/>
+        <small>Rp ${p.harga.toLocaleString("id-ID")}</small><br/>
+        <button onclick="tambah(${i})">Tambah</button>
+      `;
+      menuDiv.appendChild(div);
+    });
+
+    function tambah(i) {
+      keranjang.push(produk[i]);
       renderKeranjang();
     }
 
     function renderKeranjang() {
-      const ul = document.getElementById("daftarKeranjang");
-      ul.innerHTML = "";
+      keranjangList.innerHTML = "";
       let total = 0;
-      keranjang.forEach((item, index) => {
-        total += item.harga * item.jumlah;
+      keranjang.forEach((item, idx) => {
+        total += item.harga;
         const li = document.createElement("li");
-        li.innerHTML = `${item.nama} x ${item.jumlah} = Rp ${item.harga * item.jumlah}
-          <button onclick="ubahJumlah(${index}, -1)">-</button>
-          <button onclick="ubahJumlah(${index}, 1)">+</button>
-          <button onclick="hapusItem(${index})">Batal</button>`;
-        ul.appendChild(li);
+        li.textContent = `${item.nama} - Rp ${item.harga.toLocaleString("id-ID")}`;
+        keranjangList.appendChild(li);
       });
-      document.getElementById("totalHarga").textContent = total;
-    }
-
-    function ubahJumlah(index, delta) {
-      keranjang[index].jumlah += delta;
-      if (keranjang[index].jumlah <= 0) keranjang.splice(index, 1);
-      renderKeranjang();
-    }
-
-    function hapusItem(index) {
-      keranjang.splice(index, 1);
-      renderKeranjang();
+      totalEl.textContent = total.toLocaleString("id-ID");
     }
 
     function checkout() {
-      const nama = document.getElementById("nama").value.trim();
-      const statusEl = document.getElementById("status");
-      if (!nama) {
-        statusEl.textContent = "⚠️ Silakan isi nama pelanggan.";
+      const nama = document.getElementById("nama").value;
+      if (!nama || keranjang.length === 0) {
+        alert("Isi nama dan tambahkan menu ke keranjang.");
         return;
       }
-      if (keranjang.length === 0) {
-        statusEl.textContent = "⚠️ Keranjang masih kosong.";
-        return;
-      }
-      statusEl.textContent = `✅ Pesanan atas nama ${nama} telah dikirim!`;
-      keranjang.length = 0;
-      renderKeranjang();
-      document.getElementById("nama").value = "";
+      localStorage.setItem("namaPelanggan", nama);
+      localStorage.setItem("keranjang", JSON.stringify(keranjang));
+      window.location.href = "index-struk.html";
     }
   </script>
 </body>

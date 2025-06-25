@@ -2,84 +2,55 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Struk Pembelian</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    h2 {
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px;
-      text-align: left;
-    }
-    th {
-      background: #f0f0f0;
-    }
-    .total {
-      margin-top: 1rem;
-      text-align: right;
-      font-weight: bold;
-    }
-    .center {
-      text-align: center;
-    }
+    body { font-family: sans-serif; padding: 20px; max-width: 700px; margin: auto; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; }
+    .total { text-align: right; font-weight: bold; margin-top: 10px; }
+    .buttons { margin-top: 20px; text-align: center; }
+    button { padding: 8px 16px; margin: 5px; }
   </style>
 </head>
-<body onload="cetakStruk()">
+<body onload="tampilkanStruk()">
   <h2>Struk Pembelian - Toko Sederhana</h2>
-  <p><strong>Nama:</strong> <span id="nama"></span></p>
+  <p><strong>Nama Pelanggan:</strong> <span id="nama"></span></p>
   <p><strong>Tanggal:</strong> <span id="tanggal"></span></p>
 
   <table>
-    <thead>
-      <tr>
-        <th>Nama Barang</th>
-        <th>Jumlah</th>
-        <th>Harga</th>
-        <th>Subtotal</th>
-      </tr>
-    </thead>
-    <tbody id="tabel-struk"></tbody>
+    <thead><tr><th>Nama</th><th>Jumlah</th><th>Harga</th><th>Subtotal</th></tr></thead>
+    <tbody id="isi-struk"></tbody>
   </table>
 
   <p class="total">Total: <span id="total"></span></p>
-  <p class="center">Terima kasih atas pembeliannya!</p>
+
+  <div class="buttons">
+    <button onclick="window.print()">🖨️ Cetak / Simpan</button>
+    <button onclick="window.history.back()">← Kembali</button>
+  </div>
 
   <script>
-    function cetakStruk() {
+    function tampilkanStruk() {
       const keranjang = JSON.parse(localStorage.getItem("keranjang") || "[]");
       const nama = localStorage.getItem("namaPelanggan") || "-";
       document.getElementById("nama").textContent = nama;
       document.getElementById("tanggal").textContent = new Date().toLocaleString("id-ID");
 
-      const tbody = document.getElementById("tabel-struk");
-      let total = 0;
-      const rekap = {};
-
+      const isi = document.getElementById("isi-struk");
+      const ringkas = {};
       keranjang.forEach(item => {
-        if (!item.nama || !item.harga) return;
-        if (!rekap[item.nama]) rekap[item.nama] = { jumlah: 0, harga: item.harga };
-        rekap[item.nama].jumlah += 1;
+        if (!ringkas[item.nama]) ringkas[item.nama] = { jumlah: 0, harga: item.harga };
+        ringkas[item.nama].jumlah++;
       });
 
-      Object.keys(rekap).forEach(nama => {
-        const item = rekap[nama];
+      let total = 0;
+      Object.keys(ringkas).forEach(nama => {
+        const item = ringkas[nama];
         const subtotal = item.jumlah * item.harga;
         total += subtotal;
-
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${nama}</td>
@@ -87,7 +58,7 @@
           <td>Rp ${item.harga.toLocaleString("id-ID")}</td>
           <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
         `;
-        tbody.appendChild(tr);
+        isi.appendChild(tr);
       });
 
       document.getElementById("total").textContent = "Rp " + total.toLocaleString("id-ID");
