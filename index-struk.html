@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <title>Struk Pembelian</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 700px; margin: auto; }
     h2 { text-align: center; }
@@ -28,11 +30,13 @@
   <p class="total">Total: <span id="total"></span></p>
 
   <div class="buttons">
-    <button onclick="window.print()">🖨️ Cetak / Simpan</button>
+    <button onclick="simpanPDF()">💾 Simpan PDF</button>
     <button onclick="window.history.back()">← Kembali</button>
   </div>
 
   <script>
+    let dataPDF = [];
+
     function tampilkanStruk() {
       const keranjang = JSON.parse(localStorage.getItem("keranjang") || "[]");
       const nama = localStorage.getItem("namaPelanggan") || "-";
@@ -47,6 +51,7 @@
       });
 
       let total = 0;
+      dataPDF = [];
       Object.keys(ringkas).forEach(nama => {
         const item = ringkas[nama];
         const subtotal = item.jumlah * item.harga;
@@ -59,9 +64,28 @@
           <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
         `;
         isi.appendChild(tr);
+        dataPDF.push([nama, item.jumlah, "Rp " + item.harga.toLocaleString("id-ID"), "Rp " + subtotal.toLocaleString("id-ID")]);
       });
 
       document.getElementById("total").textContent = "Rp " + total.toLocaleString("id-ID");
+    }
+
+    async function simpanPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const nama = document.getElementById("nama").textContent;
+      const tanggal = document.getElementById("tanggal").textContent;
+      doc.text(`Struk Pembelian - ${nama}`, 14, 14);
+      doc.text(`Tanggal: ${tanggal}`, 14, 22);
+
+      doc.autoTable({
+        startY: 28,
+        head: [["Nama", "Jumlah", "Harga", "Subtotal"]],
+        body: dataPDF,
+        theme: 'grid'
+      });
+
+      doc.save(`Struk-${nama.replace(/ /g,"_")}.pdf`);
     }
   </script>
 </body>
