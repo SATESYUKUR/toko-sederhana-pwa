@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toko Sederhana</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  <meta name="theme-color" content="#4CAF50" />
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 1rem; }
+    h1 { text-align: center; color: #333; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 1rem; }
+    .menu-card {
+      background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .menu-card img { width: 100%; height: auto; border-radius: 8px; }
+    .menu-card h3 { margin: 10px 0 5px; font-size: 16px; }
+    .menu-card button {
+      background: #28a745; color: white; border: none; padding: 6px 12px;
+      border-radius: 6px; cursor: pointer; margin-top: 8px;
+    }
+    .menu-card button:hover { background: #218838; }
+    #cart {
+      margin-top: 2rem; background: white; padding: 1rem; border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input { padding: 6px; margin-bottom: 1rem; width: 100%; max-width: 300px; }
+    .cart-actions button { margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>MENU HARI INI</h1>
+  <input type="text" id="nama" placeholder="Nama Pelanggan" />
+  <div id="products" class="menu-grid"></div>
+
+  <div id="cart">
+    <h2>Keranjang Belanja</h2>
+    <ul id="cart-items"></ul>
+    <p>Total: Rp <span id="total">0</span></p>
+    <div class="cart-actions">
+      <button onclick="checkout()">Checkout</button>
+      <button onclick="clearCart()">Batal</button>
+    </div>
+  </div>
+
+  <script>
+    const products = [
+      { id: 1, name: "Minas Ayam", price: 18000, image: "minas-ayam.png" },
+      { id: 2, name: "Minas Sate", price: 14000, image: "minas-sate.png" },
+      { id: 3, name: "Minas Telor", price: 14000, image: "minas-telor.png" },
+      { id: 4, name: "Minuman", price: 5000, image: "minuman.png" }
+    ];
+    let cart = [];
+
+    function addToCart(id) {
+      const item = products.find(p => p.id === id);
+      const existing = cart.find(p => p.id === id);
+      if (existing) existing.qty++;
+      else cart.push({...item, qty: 1});
+      renderCart();
+    }
+
+    function renderCart() {
+      const el = document.getElementById("cart-items");
+      el.innerHTML = "";
+      let total = 0;
+      cart.forEach(item => {
+        const li = document.createElement("li");
+        const subtotal = item.qty * item.price;
+        total += subtotal;
+        li.textContent = `${item.name} x ${item.qty} = Rp ${subtotal.toLocaleString("id-ID")}`;
+        el.appendChild(li);
+      });
+      document.getElementById("total").textContent = total.toLocaleString("id-ID");
+    }
+
+    function checkout() {
+      const nama = document.getElementById("nama").value.trim();
+      if (!nama || cart.length === 0) {
+        alert("Masukkan nama pelanggan dan pastikan keranjang tidak kosong.");
+        return;
+      }
+      localStorage.setItem("keranjang", JSON.stringify(cart));
+      localStorage.setItem("namaPelanggan", nama);
+      window.location.href = "index-struk.html";
+    }
+
+    function clearCart() {
+      cart = [];
+      renderCart();
+    }
+
+    const container = document.getElementById("products");
+    products.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "menu-card";
+      card.innerHTML = `
+        <img src="${p.image}" alt="${p.name}" onerror="this.src='placeholder.jpg'">
+        <h3>${p.name}</h3>
+        <p>Rp ${p.price.toLocaleString("id-ID")}</p>
+        <button onclick="addToCart(${p.id})">Tambah</button>
+      `;
+        <img src="${p.image}" alt="${p.name}" onerror="this.src='placeholder.jpg'">
+        <h3>${p.name}</h3>
+        <p>Rp ${p.price.toLocaleString("id-ID")}</p>
+        <button onclick="addToCart(${p.id})">Tambah</button>
+      `;
+      container.appendChild(card);
+    });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => console.log('Service Worker registered:', reg))
+          .catch(err => console.error('Service Worker failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
