@@ -97,7 +97,12 @@
     products.forEach(p => {
       const card = document.createElement("div");
       card.className = "menu-card";
-      card.innerHTML = `<img src="\${p.image}" alt="\${p.name}" onerror="this.src='placeholder.jpg'"><h3>\${p.name}</h3><p>Rp \${p.price.toLocaleString("id-ID")}</p><button onclick="addToCart(\${p.id})">Tambah</button>`;
+      card.innerHTML = `
+        <img src="${p.image}" alt="${p.name}" onerror="this.src='placeholder.jpg'">
+        <h3>${p.name}</h3>
+        <p>Rp ${p.price.toLocaleString("id-ID")}</p>
+        <button onclick="addToCart(${p.id})">Tambah</button>
+      `;
       container.appendChild(card);
     });
   </script>
